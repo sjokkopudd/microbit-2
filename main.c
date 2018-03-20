@@ -6,14 +6,17 @@ int main()
 {
 	uart_init();
 
+	GPIO->PIN_CNF[17] = 0;
+	GPIO->PIN_CNF[26] = 0;
+
 	while(1)
 	{
-		if (GPIO->PIN_CNF[17])
+		if (!(GPIO->IN&(1 << 17)))
 		{
 			uart_send('A');
 		}
 
-		else if (GPIO->PIN_CNF[26])
+		else if (!(GPIO->IN&(1 << 26)))
 		{
 			uart_send('B');
 		}

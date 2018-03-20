@@ -1,5 +1,6 @@
 #include "uart.h"
 #include <stdint.h>
+#include <stdio.h>
 #include "gpio.h"
 #define UART ((NRF_UART_REG*)0x40002000)
 
@@ -44,29 +45,37 @@ typedef struct
 
 void uart_init() 
 {
-	UART->PSELRXD = (1 << 25);
-	UART->PSELRXD = (1 << 24);
+	GPIO->PIN_CNF[24] = 1;
+	GPIO->PIN_CNF[25] = 0;
+	//GPIO->OUTSET = (1 << 24);
+
+	UART->PSELRXD = 25;
+	UART->PSELTXD = 24;
+
 	UART->PSELRTS = 0xFFFFFFFF;
 	UART->PSELCTS = 0xFFFFFFFF;
+
 	UART->BAUDRATE = 0x00275000;
-	UART->ENABLE = (1 << 4);
-	UART->STARTRX = (0x1);
+
+	UART->ENABLE = 0x4;
+	UART->STARTRX = 0x1;
 
 }
 
 void uart_send(char letter)
 {
 
+	UART->STARTTX = 1;
+
 	UART->TXD = letter;
-	while (!UART->TXDRDY)
-	{
-		UART->TXDRDY = 0;
-	}
+	while (!UART->TXDRDY);
+	UART->TXDRDY = 0;
+	UART->STOPTX = 1;
 }
 
 char uart_read()
 {
-	UART->RXDRDY = 0; 
+	UART->RXDRDY = 0x0; 
 
 	if (!UART->RXD)
 	{
