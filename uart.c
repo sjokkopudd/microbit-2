@@ -64,7 +64,6 @@ void uart_init()
 
 void uart_send(char letter)
 {
-
 	UART->STARTTX = 1;
 
 	UART->TXD = letter;
@@ -75,14 +74,15 @@ void uart_send(char letter)
 
 char uart_read()
 {
-	UART->RXDRDY = 0x0; 
-
-	if (!UART->RXD)
+	if (!UART->RXDRDY)
 	{
-		UART->RXDRDY = 1;
 		return '\0';
-	}
+	}  
+	
+	char rec;
+	UART->RXDRDY = 0;
+	rec = UART->RXD;
+	uart_send(rec);
+	return rec;
 
-	UART->RXDRDY = 1;
-	return UART->RXD; 
 }
